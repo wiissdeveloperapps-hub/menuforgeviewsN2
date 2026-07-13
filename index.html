@@ -221,6 +221,21 @@
             color: #000;
             align-self: flex-end;
         }
+        /* Selector visible en modo oscuro */
+        body.dark-mode select,
+        body.dark-mode select option {
+            background-color: #2b2b2b !important;
+            color: #ffffff !important;
+        }
+
+        /* Evita que el navegador fuerce su propio estilo */
+        body.dark-mode select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 1px solid #555 !important;
+        }
+
     </style>
 </head>
 
@@ -353,7 +368,15 @@
             return;
         }
 
+        // Logo
         dom.restaurantLogo.src = fullMenuData.logoRestaurante || '';
+
+        // Ocultar si no hay logo
+        if (!fullMenuData.logoRestaurante || fullMenuData.logoRestaurante.trim() === "") {
+            dom.restaurantLogo.style.display = "none";
+        } else {
+            dom.restaurantLogo.style.display = "block";
+        }
         dom.restaurantName.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
         document.body.className = `template-${fullMenuData.plantilla || 'moderna'}`;
 
