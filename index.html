@@ -1,125 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Menú Gourmet</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <style>
-    :root { --bg: #0a0a0a; --card: #151515; --text: #ffffff; --accent: #c5a059; --muted: #9aa0a6; }
-    body { margin:0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
-    
-    /* Header Premium */
-    .header-container { padding: 30px 20px; border-bottom: 1px solid #222; text-align: center; }
-    #logo-display { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--accent); margin: 0; }
-    
-    /* Selector de Banderas */
-    .lang-wrapper { margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .lang-btn { background: #222; border: 1px solid #444; cursor: pointer; padding: 5px; border-radius: 6px; }
-    .lang-btn img { width: 30px; height: 20px; border-radius: 3px; display: block; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Digital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        /* General Body & Theme */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #212529;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    /* Menú */
-    #menu-container { max-width: 600px; margin: 20px auto; padding: 0 20px; }
-    .cat-title { font-family: 'Playfair Display', serif; color: var(--accent); margin: 30px 0 15px; font-size: 1.4rem; text-align: center; border-bottom: 1px solid #222; padding-bottom: 10px; }
-    .plato-card { display: flex; align-items: center; gap: 15px; background: var(--card); border-radius: 12px; margin-bottom: 15px; padding: 10px; border: 1px solid #222; }
-    .plato-img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #222; }
-    .plato-info { flex: 1; }
-    .plato-info h3 { margin: 0; font-size: 1rem; }
-    .plato-info p { margin: 4px 0 0; font-size: 0.85rem; color: var(--muted); }
-    .plato-price { color: var(--accent); font-weight: 700; margin-top: 5px; display: block; }
+        /* Header */
+        header {
+            background-color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #dee2e6;
+        }
+        #restaurant-logo {
+            max-height: 80px;
+            max-width: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #restaurant-name {
+            font-size: 2.2em;
+            margin: 10px 0;
+            font-weight: 700;
+        }
+        #language-selector {
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+            margin-bottom: 10px;
+        }
 
-    /* Botón Flotante PDF */
-    .fab-pdf { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: #000; padding: 12px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; }
-  </style>
+        /* Main Container */
+        #menu-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        #loader {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5em;
+            color: #6c757d;
+        }
+
+        /* Category Styling */
+        .category {
+            margin-bottom: 40px;
+        }
+        .category-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #343a40;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        /* Dish Styling */
+        .dish {
+            display: flex;
+            gap: 15px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .dish:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .dish-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .dish-details {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .dish-name {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin: 0 0 5px;
+        }
+        .dish-desc {
+            color: #6c757d;
+            margin: 0 0 10px;
+            flex-grow: 1;
+        }
+        .dish-price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #000;
+            align-self: flex-end;
+        }
+
+        /* Template: clasica */
+        body.template-clasica .category-title {
+            font-family: "Times New Roman", serif;
+            border-bottom-color: #8B4513; /* SaddleBrown */
+        }
+        body.template-clasica .dish { border: 1px solid #ddd; }
+
+        /* Template: rustica */
+        body.template-rustica { background-color: #f5f5dc; /* Beige */ }
+        body.template-rustica header { background-color: #D2B48C; border-bottom-color: #8B4513; }
+        body.template-rustica .category-title { color: #556B2F; border-bottom-color: #556B2F; }
+        body.template-rustica .dish { background-color: #fffef0; border: 1px solid #D2B48C; }
+
+    </style>
 </head>
 <body>
 
-  <div class="header-container" id="pdf-header">
-    <img id="logo-display" style="display:none;">
-    <h1 id="restaurant-title">Cargando...</h1>
-    <div class="lang-wrapper" id="lang-panel"></div>
-  </div>
+    <header id="header-container" style="display: none;">
+        <img id="restaurant-logo" src="" alt="Logo del restaurante">
+        <h1 id="restaurant-name"></h1>
+        <select id="language-selector"></select>
+    </header>
 
-  <main id="menu-container"></main>
+    <div id="menu-container">
+        <div id="loader">Cargando menú...</div>
+    </div>
 
-  <button class="fab-pdf" id="btn-pdf">Descargar PDF</button>
+    <script>
+        const REPO_OWNER = 'wiissdeveloperapps-hub';
+        const REPO_NAME = 'menuforgeviews';
+        let fullMenuData = null;
 
-  <script>
-    const FLAG_DIR = 'assets/flags/';
-    const FLAG_MAP = { es:'es.png', en:'en.png', fr:'fr.png', it:'it.png', de:'de.png', pt:'pt.png', cn:'cn.png', sa:'sa.png' };
-    const REPO_OWNER = 'wiissdeveloperapps-hub';
-    const REPO_NAME = 'menuforgeviews';
-    
-    let menuData = null;
-    let imageMap = {}; // Mapa para buscar imágenes por ID
+        const dom = {
+            loader: document.getElementById('loader'),
+            header: document.getElementById('header-container'),
+            restaurantLogo: document.getElementById('restaurant-logo'),
+            restaurantName: document.getElementById('restaurant-name'),
+            langSelector: document.getElementById('language-selector'),
+            menuContainer: document.getElementById('menu-container')
+        };
 
-    window.addEventListener('load', async () => {
-      const hash = window.location.hash.substring(1);
-      if (hash.startsWith('remote:')) {
-        const id = hash.replace('remote:', '');
-        try {
-          const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`);
-          menuData = await res.json();
-          
-          // Mapear imágenes del JSON raíz por ID
-          menuData.categorias.forEach(cat => {
-            cat.platos.forEach(p => imageMap[p.id] = p.imagen);
-          });
-          
-          if(menuData.logoBase64) {
-             const img = document.getElementById('logo-display');
-             img.src = menuData.logoBase64;
-             img.style.display = 'block';
-          }
+        document.addEventListener('DOMContentLoaded', init);
 
-          buildLangPanel();
-          render('es');
-        } catch(e) { document.getElementById('restaurant-title').textContent = 'Error al cargar'; }
-      }
-    });
+        async function init() {
+            try {
+                const hash = window.location.hash.substring(1);
+                let menuData;
 
-    function buildLangPanel() {
-      const panel = document.getElementById('lang-panel');
-      Object.keys(menuData.traducciones || {}).forEach(code => {
-        const btn = document.createElement('button');
-        btn.className = 'lang-btn';
-        btn.innerHTML = `<img src="${FLAG_DIR}${FLAG_MAP[code] || code+'.png'}">`;
-        btn.onclick = () => render(code);
-        panel.appendChild(btn);
-      });
-    }
+                if (hash.startsWith('pako:')) {
+                    menuData = decompressPako(hash.substring(5));
+                } else if (hash.startsWith('remote:')) {
+                    menuData = await fetchRemote(hash.substring(7));
+                } else {
+                    showError('Formato de URL no válido o menú no encontrado.');
+                    return;
+                }
 
-    function render(lang) {
-      const trad = menuData.traducciones[lang];
-      document.getElementById('restaurant-title').textContent = trad.nombre;
-      const container = document.getElementById('menu-container');
-      container.innerHTML = '';
-      
-      trad.categorias.forEach((cat, catIndex) => {
-        container.innerHTML += `<h2 class="cat-title">${cat.nombre}</h2>`;
-        cat.platos.forEach((p, pIndex) => {
-          // Buscamos la imagen original en el JSON raíz usando el ID del plato
-          const imgBase64 = imageMap[p.id] || '';
-          container.innerHTML += `
-            <div class="plato-card">
-              <img src="${imgBase64}" class="plato-img" onerror="this.style.display='none'">
-              <div class="plato-info">
-                <h3>${p.nombre}</h3>
-                <p>${p.descripcion || ''}</p>
-                <span class="plato-price">${p.precio || 0}€</span>
-              </div>
-            </div>`;
-        });
-      });
-    }
+                if (!menuData || !menuData.traducciones) {
+                    showError('No se pudieron cargar los datos del menú o el formato es incorrecto.');
+                    return;
+                }
+                setupUI(menuData);
+            } catch (error) {
+                console.error('Error al inicializar:', error);
+                showError('Ha ocurrido un error al cargar el menú.');
+            }
+        }
 
-    document.getElementById('btn-pdf').onclick = () => {
-      const btn = document.getElementById('btn-pdf');
-      btn.style.display = 'none';
-      html2pdf().from(document.body).save('menu.pdf').then(() => btn.style.display = 'block');
-    };
-  </script>
+        function decompressPako(base64String) {
+            try {
+                const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
+                const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
+                return JSON.parse(decompressed);
+            } catch (error) {
+                console.error('Error al descomprimir:', error);
+                throw new Error('Los datos del menú están corruptos.');
+            }
+        }
+
+        async function fetchRemote(id) {
+            const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
+            return await response.json();
+        }
+
+        function setupUI(data) {
+            fullMenuData = data;
+            dom.loader.style.display = 'none';
+            dom.header.style.display = 'block';
+
+            dom.langSelector.innerHTML = '';
+            Object.keys(fullMenuData.traducciones).forEach(langCode => {
+                const option = document.createElement('option');
+                option.value = langCode;
+                option.textContent = fullMenuData.traducciones[langCode].meta.languageName;
+                dom.langSelector.appendChild(option);
+            });
+
+            const browserLang = navigator.language.split('-')[0];
+            const initialLang = fullMenuData.traducciones[browserLang] ? browserLang : Object.keys(fullMenuData.traducciones)[0];
+            dom.langSelector.value = initialLang;
+
+            renderMenu(initialLang);
+            dom.langSelector.addEventListener('change', (e) => renderMenu(e.target.value));
+        }
+
+        function renderMenu(langCode) {
+            if (!fullMenuData) return;
+            const langData = fullMenuData.traducciones[langCode];
+            if (!langData) {
+                showError(`Traducción no disponible para: ${langCode}`);
+                return;
+            }
+
+            dom.restaurantLogo.src = fullMenuData.logoRestaurante || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            dom.restaurantName.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
+            document.body.className = `template-${fullMenuData.plantilla || 'moderna'}`;
+
+            let menuHtml = langData.categorias?.map(category => `
+                <div class="category">
+                    <h2 class="category-title">${category.nombre}</h2>
+                    ${category.platos?.map(dish => `
+                        <div class="dish">
+                            ${dish.imagen ? `<img class="dish-img" src="${dish.imagen}" alt="${dish.nombre}">` : ''}
+                            <div class="dish-details">
+                                <div class="dish-name">${dish.nombre}</div>
+                                <p class="dish-desc">${dish.descripcion || ''}</p>
+                                <div class="dish-price">${formatPrice(dish.precio)}</div>
+                            </div>
+                        </div>
+                    `).join('') || ''}
+                </div>
+            `).join('') || '<p>Este menú está vacío.</p>';
+
+            dom.menuContainer.innerHTML = menuHtml;
+        }
+
+        function formatPrice(price) {
+            if (typeof price !== 'number') return '';
+            return price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+        }
+
+        function showError(message) {
+            dom.loader.style.display = 'none';
+            dom.menuContainer.innerHTML = `<p style="color: red; text-align: center; font-size: 1.2em;">${message}</p>`;
+        }
+    </script>
+
 </body>
 </html>
