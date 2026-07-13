@@ -1,280 +1,425 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Menú Digital</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        :root { 
-            --gold: #c5a059; 
-            --bg: #0f0f0f; 
-            --card-bg: #1a1a1a; 
-            --text-main: #ffffff; 
-            --text-muted: #a0a0a0; 
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding-bottom: 100px; }
-        .header { padding: 60px 20px; text-align: center; border-bottom: 1px solid #333; }
-        .header h1 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 2.5rem; margin: 0; }
-        .header p { color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; margin-top: 10px; }
-        #menu-container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .categoria-titulo { font-family: 'Playfair Display', serif; color: var(--gold); text-align: center; font-size: 1.8rem; margin: 50px 0 30px; position: relative; }
-        .categoria-titulo::after { content: ""; display: block; width: 50px; height: 1px; background: var(--gold); margin: 10px auto; }
-        .plato-card { background: var(--card-bg); border-radius: 16px; margin-bottom: 20px; display: flex; align-items: center; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
-        .plato-img { width: 110px; height: 110px; object-fit: cover; image-orientation: from-image; transform: rotate(0deg); display:block; }
-        .plato-info { padding: 20px; flex: 1; }
-        .plato-nombre { font-size: 1.2rem; font-weight: 600; margin: 0 0 5px; color: #fff; }
-        .plato-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin: 0; }
-        .plato-precio { color: var(--gold); font-weight: 700; margin-top: 10px; font-size: 1.1rem; }
-        .controls-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 100; }
-        .fab-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; outline: none; }
-        .fab-pdf { background: #333; color: white; box-shadow: 0 0 15px rgba(0,0,0,0.5); font-weight: bold;}
-        .fab-lang { background: var(--gold); box-shadow: 0 0 20px rgba(197, 160, 89, 0.3); border: 2px solid var(--gold);}
-        .lang-options { position: fixed; bottom: 105px; right: 35px; display: none; flex-direction: column; gap: 10px; z-index: 99;}
-        .lang-options.active { display: flex; }
-        .lang-btn { cursor: pointer; border-radius: 6px; overflow: hidden; border: 2px solid var(--gold); width: 120px; height: 40px; display:flex; align-items:center; gap:8px; padding:4px 8px; background: #111; color: #fff; }
-        .lang-flag { width: 32px; height: 32px; border-radius: 4px; overflow:hidden; display:inline-block; }
-        .lang-flag img { width:100%; height:100%; object-fit:cover; display:block; }
-        .lang-label { font-size: 0.9rem; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Menú Digital - Viewer</title>
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- html2pdf -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* -------------------------
+       THEME: cambia aquí la paleta por defecto
+       valores posibles: dark | light | gold
+       ------------------------- */
+    :root { --theme: dark; }
+
+    /* PALETA */
+    :root[data-theme="dark"] {
+      --bg: #0f0f0f;
+      --card-bg: #121212;
+      --muted: #9aa0a6;
+      --text: #ffffff;
+      --accent: #c5a059;
+      --accent-2: #7bd389;
+    }
+    :root[data-theme="light"] {
+      --bg: #f7f7f8;
+      --card-bg: #ffffff;
+      --muted: #6b7280;
+      --text: #0b1220;
+      --accent: #1f6feb;
+      --accent-2: #ff7a59;
+    }
+    :root[data-theme="gold"] {
+      --bg: #0b0b0b;
+      --card-bg: linear-gradient(135deg,#1a1a1a 0%, #0f0f0f 100%);
+      --muted: #bfb1a0;
+      --text: #fffaf0;
+      --accent: #e0b24a;
+      --accent-2: #d46a6a;
+    }
+
+    /* Aplicar tema inicial */
+    html { height:100%; }
+    body { margin:0; min-height:100%; font-family:Inter, sans-serif; background:var(--bg); color:var(--text); transition:background .25s ease; }
+    html[data-theme="dark"], html[data-theme="light"], html[data-theme="gold"] { }
+
+    /* Contenedor principal */
+    #pdf-content { max-width:900px; margin: 30px auto 120px; padding: 24px; }
+
+    /* Header */
+    .header {
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding: 28px; border-radius: 12px; margin-bottom: 18px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .brand {
+      display:flex; align-items:center; gap:14px;
+    }
+    .brand .logo {
+      width:72px; height:72px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center;
+      background:var(--accent); color:#111; font-weight:700; font-family:Playfair Display, serif; font-size:1.4rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .brand h1 { margin:0; font-family:Playfair Display, serif; font-size:1.6rem; color:var(--accent); }
+    .brand p { margin:0; color:var(--muted); font-size:0.85rem; }
+
+    /* Controles flotantes */
+    .controls-container {
+      position: fixed; right: 28px; bottom: 28px; display:flex; flex-direction:column; gap:12px; z-index:1200;
+      align-items:flex-end;
+    }
+    .fab {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 14px; border-radius:999px; cursor:pointer; border:none; outline:none;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      color:var(--text); box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+    }
+    .fab.pdf { background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4)); color:#fff; }
+    .fab.lang { background: var(--accent); color:#111; font-weight:700; }
+
+    /* Selector idiomas (panel) */
+    .lang-panel {
+      position: fixed; right: 28px; bottom: 92px; display:flex; flex-direction:column; gap:8px; z-index:1199;
+      background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
+      padding:8px; border-radius:10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      display:none;
+    }
+    .lang-panel.active { display:flex; }
+    .lang-item { display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:8px; cursor:pointer; min-width:140px; }
+    .lang-item:hover { background: rgba(255,255,255,0.02); }
+    .lang-flag { width:36px; height:24px; border-radius:4px; overflow:hidden; flex:0 0 36px; }
+    .lang-flag img { width:100%; height:100%; object-fit:cover; display:block; }
+    .lang-label { color:var(--text); font-weight:600; font-size:0.95rem; }
+
+    /* Menu container */
+    #menu-container { display:flex; flex-direction:column; gap:22px; }
+
+    .categoria-titulo {
+      text-align:center; font-family:Playfair Display, serif; font-size:1.8rem; color:var(--accent);
+      margin: 18px 0 6px;
+    }
+
+    /* Grid de platos */
+    .platos-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:18px; }
+    .plato-card {
+      display:flex; gap:12px; align-items:stretch; padding:12px; border-radius:14px;
+      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.03); overflow:hidden;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .plato-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.5); }
+
+    .plato-media { width:140px; height:120px; flex:0 0 140px; border-radius:10px; overflow:hidden; background:#111; display:flex; align-items:center; justify-content:center; }
+    .plato-media img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    .plato-body { flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:6px 0; }
+    .plato-nombre { font-weight:700; font-size:1.05rem; margin:0; color:var(--text); }
+    .plato-desc { margin:6px 0 0; color:var(--muted); font-size:0.92rem; line-height:1.3; }
+    .plato-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+    .plato-precio { color:var(--accent); font-weight:800; font-size:1.05rem; }
+
+    /* Responsive tweaks */
+    @media (max-width:640px) {
+      .plato-media { width:110px; height:90px; }
+      .platos-grid { grid-template-columns: 1fr; }
+      #pdf-content { padding:12px; margin:12px; }
+    }
+  </style>
 </head>
 <body>
-    <div id="pdf-content">
-        <header class="header">
-            <h1 id="restaurant-title">Cargando...</h1>
-            <p id="subtitle">Nuestro Menú</p>
-        </header>
-        <main id="menu-container"></main>
-    </div>
-
-    <div id="lang-menu" class="lang-options"></div>
-
-    <div class="controls-container">
-        <button class="fab-btn fab-pdf" onclick="descargarPDF()">PDF</button>
-        <div class="fab-btn fab-lang" onclick="document.getElementById('lang-menu').classList.toggle('active')">
-            <img id="current-flag" src="assets/flags/es.png" width="35" alt="flag">
+  <div id="pdf-content" role="main" aria-live="polite">
+    <header class="header">
+      <div class="brand">
+        <div class="logo" id="logo-letter">M</div>
+        <div>
+          <h1 id="restaurant-title">Cargando...</h1>
+          <p id="subtitle">Nuestro Menú</p>
         </div>
-    </div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div id="meta-info" style="text-align:right; color:var(--muted); font-size:0.9rem;"></div>
+      </div>
+    </header>
 
-    <script>
-        let menuData = null;
-        // Mapa de idioma -> archivo de flag (ajusta si tus nombres son distintos)
-        const FLAG_MAP = {
-            es: 'es.png',
-            en: 'en.png',
-            fr: 'fr.png',
-            it: 'it.png',
-            de: 'de.png',
-            pt: 'pt.png',
-            cn: 'cn.png',
-            sa: 'sa.png'
-        };
+    <main id="menu-container"></main>
+  </div>
 
-        window.onload = () => {
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                try {
-                    menuData = JSON.parse(decodeURIComponent(escape(atob(hash))));
-                    buildLangMenu(); // construye el selector dinámico
-                    renderMenu('es'); // idioma por defecto
-                } catch (e) {
-                    document.getElementById('restaurant-title').innerText = "Error leyendo menú";
-                    console.error('Error decodificando hash:', e);
-                }
-            } else {
-                document.getElementById('restaurant-title').innerText = "Escanea un QR válido";
-            }
-        };
+  <!-- Controles flotantes -->
+  <div class="controls-container" aria-hidden="false">
+    <button class="fab pdf" id="btn-pdf" title="Descargar PDF">PDF</button>
+    <button class="fab lang" id="btn-lang" title="Idiomas">
+      <span id="current-flag-wrap" style="display:inline-block; width:28px; height:20px; overflow:hidden; border-radius:4px; margin-right:8px;">
+        <img id="current-flag" src="assets/flags/es.png" alt="flag" style="width:100%; height:100%; object-fit:cover;">
+      </span>
+      <span style="font-weight:700;">Idioma</span>
+    </button>
+  </div>
 
-        // Construye dinámicamente el menú de idiomas según menuData.traducciones
-        function buildLangMenu() {
-            const menu = document.getElementById('lang-menu');
-            menu.innerHTML = '';
-            const langs = menuData?.traducciones ? Object.keys(menuData.traducciones) : ['es','en'];
-            // Aseguramos que 'es' esté presente
-            if (!langs.includes('es')) langs.unshift('es');
+  <!-- Panel idiomas -->
+  <div id="lang-panel" class="lang-panel" role="menu" aria-hidden="true"></div>
 
-            langs.forEach(code => {
-                const btn = document.createElement('div');
-                btn.className = 'lang-btn';
-                btn.onclick = () => { changeLanguage(code); };
+  <script>
+    // -------------------------
+    // CONFIG
+    // -------------------------
+    const FLAG_DIR = 'assets/flags/';
+    const FLAG_MAP = { es:'es.png', en:'en.png', fr:'fr.png', it:'it.png', de:'de.png', pt:'pt.png', cn:'cn.png', sa:'sa.png' };
 
-                const flagWrap = document.createElement('div');
-                flagWrap.className = 'lang-flag';
-                const img = document.createElement('img');
-                // Intentamos usar el archivo de flags según FLAG_MAP; si no existe, se mostrará 404
-                const flagFile = FLAG_MAP[code] || `${code}.png`;
-                img.src = `assets/flags/${flagFile}`;
-                img.alt = code;
-                flagWrap.appendChild(img);
+    // Aplicar tema inicial
+    (function applyInitialTheme() {
+      const theme = document.documentElement.getAttribute('data-theme') || getComputedStyle(document.documentElement).getPropertyValue('--theme').trim() || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
 
-                const label = document.createElement('div');
-                label.className = 'lang-label';
-                // Si en las traducciones hay un nombre legible para el idioma, lo usamos; si no, mostramos el código
-                const labelText = (menuData?.traducciones?.[code]?.meta?.languageName) || code.toUpperCase();
-                label.textContent = labelText;
+    // -------------------------
+    // Datos
+    // -------------------------
+    let menuData = null;
 
-                btn.appendChild(flagWrap);
-                btn.appendChild(label);
-                menu.appendChild(btn);
-            });
-        }
+    // Decodifica hash seguro (base64)
+    function decodeHash(hash) {
+      try {
+        return JSON.parse(decodeURIComponent(escape(atob(hash))));
+      } catch (e) {
+        console.error('Error decodificando hash:', e);
+        return null;
+      }
+    }
 
-        function changeLanguage(langCode) {
-            const flagFile = FLAG_MAP[langCode] || `${langCode}.png`;
-            document.getElementById('current-flag').src = `assets/flags/${flagFile}`;
-            document.getElementById('lang-menu').classList.remove('active');
-            renderMenu(langCode);
-        }
+    // Pre-carga imágenes (soporta data: y rutas relativas)
+    function preloadImages(urls = []) {
+      const promises = urls.map(u => new Promise(res => {
+        if (!u) return res();
+        const img = new Image();
+        // Si es relativa, la convertimos a absoluta
+        const src = resolveImageUrl(u);
+        if (!src.startsWith('data:')) img.crossOrigin = 'anonymous';
+        img.onload = () => res();
+        img.onerror = () => { console.warn('Imagen no cargada:', src); res(); };
+        img.src = src;
+      }));
+      return Promise.all(promises);
+    }
 
-        // Pre-carga imágenes y espera a que todas terminen (soporta data: y rutas relativas)
-        function preloadImages(urls) {
-            const promises = urls.map(url => new Promise((resolve) => {
-                if (!url) return resolve();
-                try {
-                    const img = new Image();
-                    // Si es data: no necesita crossOrigin
-                    if (!url.startsWith('data:')) {
-                        img.crossOrigin = 'anonymous';
-                    }
-                    img.onload = () => resolve();
-                    img.onerror = () => {
-                        console.warn('Imagen no cargada:', url);
-                        resolve();
-                    };
-                    // Si la URL es relativa (empieza por 'assets/'), la convertimos a absoluta para evitar problemas de resolución
-                    if (url.startsWith('assets/')) {
-                        img.src = new URL(url, window.location.href).href;
-                    } else {
-                        img.src = url;
-                    }
-                } catch (err) {
-                    console.warn('Error pre-cargando imagen:', err, url);
-                    resolve();
-                }
-            }));
-            return Promise.all(promises);
-        }
+    // Convierte rutas relativas 'assets/...' a absolute URL
+    function resolveImageUrl(url) {
+      if (!url) return '';
+      if (url.startsWith('data:')) return url;
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      return new URL(url, window.location.href).href;
+    }
 
-        // Resuelve una URL de imagen para el DOM (convierte rutas relativas a absolutas)
-        function resolveImageUrl(url) {
-            if (!url) return '';
-            if (url.startsWith('data:')) return url;
-            if (url.startsWith('http://') || url.startsWith('https://')) return url;
-            // rutas relativas como 'assets/...' -> hacemos absolute URL
-            return new URL(url, window.location.href).href;
-        }
+    // Construye el menú en DOM
+    async function renderMenu(lang = 'es') {
+      if (!menuData) return;
+      const content = menuData.traducciones ? (menuData.traducciones[lang] || menuData.traducciones['es'] || menuData) : menuData;
 
-        async function renderMenu(lang) {
-            if (!menuData) return;
+      // Título y subtítulo
+      document.getElementById('restaurant-title').textContent = content.nombre || menuData.nombre || 'Restaurante';
+      document.getElementById('subtitle').textContent = content.subtitulo || menuData.subtitulo || '';
 
-            // Si hay traducciones, usamos la traducción solicitada; si no, usamos menuData tal cual
-            const content = menuData.traducciones ? (menuData.traducciones[lang] || menuData.traducciones['es'] || menuData) : menuData;
+      // Logo letter (primera letra del nombre)
+      const logoLetter = (content.nombre || menuData.nombre || 'M').trim().charAt(0).toUpperCase();
+      document.getElementById('logo-letter').textContent = logoLetter;
 
-            // Título: preferimos la traducción en content, si no existe usamos menuData.nombre
-            document.getElementById('restaurant-title').innerText = content.nombre || menuData.nombre || "Restaurante";
-            document.getElementById('subtitle').innerText = content.subtitulo || menuData.subtitulo || "Nuestro Menú";
+      // Meta info (fecha / nota)
+      const meta = content.meta?.note || menuData.meta?.note || '';
+      document.getElementById('meta-info').textContent = meta;
 
-            const container = document.getElementById('menu-container');
+      // Recolectar imágenes
+      const imageUrls = [];
+      (content.categorias || []).forEach(cat => {
+        (cat.platos || []).forEach(p => {
+          const raw = p.imagen || p.urlImagen || p.imagenBase64 || '';
+          if (raw) imageUrls.push(raw);
+        });
+      });
 
-            // Recolectamos todas las URLs de imagen para pre-carga
-            const imageUrls = [];
-            (content.categorias || []).forEach(cat => {
-                (cat.platos || []).forEach(p => {
-                    // El visor espera la propiedad 'imagen' (según lo que mapeas en la app)
-                    const imgUrl = p.imagen || p.urlImagen || p.imagenBase64 || '';
-                    if (imgUrl) {
-                        // Si es ruta relativa, la resolvemos para la pre-carga
-                        imageUrls.push(imgUrl.startsWith('assets/') ? new URL(imgUrl, window.location.href).href : imgUrl);
-                    }
-                });
-            });
+      // Preload
+      await preloadImages(imageUrls);
 
-            // Esperamos a que las imágenes carguen antes de renderizar
-            await preloadImages(imageUrls);
+      // Render
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
 
-            // Construimos el HTML de forma segura
-            container.innerHTML = '';
-            (content.categorias || []).forEach(cat => {
-                const catTitle = document.createElement('h2');
-                catTitle.className = 'categoria-titulo';
-                catTitle.textContent = cat.nombre || '';
-                container.appendChild(catTitle);
+      (content.categorias || []).forEach(cat => {
+        const title = document.createElement('h2');
+        title.className = 'categoria-titulo';
+        title.textContent = cat.nombre || '';
+        container.appendChild(title);
 
-                (cat.platos || []).forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'plato-card';
+        const grid = document.createElement('div');
+        grid.className = 'platos-grid';
 
-                    const rawImgUrl = p.imagen || p.urlImagen || p.imagenBase64 || '';
-                    const imgUrl = resolveImageUrl(rawImgUrl);
+        (cat.platos || []).forEach(p => {
+          const card = document.createElement('article');
+          card.className = 'plato-card';
+          card.setAttribute('role','article');
 
-                    if (imgUrl) {
-                        const img = document.createElement('img');
-                        img.className = 'plato-img';
-                        img.src = imgUrl;
-                        // Si no es data:, intentamos usar crossOrigin para html2canvas
-                        if (!imgUrl.startsWith('data:')) img.crossOrigin = 'anonymous';
-                        card.appendChild(img);
-                    }
+          const media = document.createElement('div');
+          media.className = 'plato-media';
 
-                    const info = document.createElement('div');
-                    info.className = 'plato-info';
+          const raw = p.imagen || p.urlImagen || p.imagenBase64 || '';
+          const src = resolveImageUrl(raw);
 
-                    const nombre = document.createElement('h3');
-                    nombre.className = 'plato-nombre';
-                    nombre.textContent = p.nombre || '';
-                    info.appendChild(nombre);
+          if (src) {
+            const img = document.createElement('img');
+            img.src = src;
+            if (!src.startsWith('data:')) img.crossOrigin = 'anonymous';
+            img.alt = p.nombre || '';
+            media.appendChild(img);
+          } else {
+            // placeholder
+            const ph = document.createElement('div');
+            ph.style.width = '100%'; ph.style.height = '100%'; ph.style.display='flex'; ph.style.alignItems='center'; ph.style.justifyContent='center';
+            ph.style.color = 'var(--muted)'; ph.textContent = 'No image';
+            media.appendChild(ph);
+          }
 
-                    const desc = document.createElement('p');
-                    desc.className = 'plato-desc';
-                    desc.textContent = p.descripcion || '';
-                    info.appendChild(desc);
+          const body = document.createElement('div');
+          body.className = 'plato-body';
 
-                    const precio = document.createElement('div');
-                    precio.className = 'plato-precio';
-                    precio.textContent = (p.precio !== undefined && p.precio !== null) ? `${p.precio}€` : '';
-                    info.appendChild(precio);
+          const name = document.createElement('h3');
+          name.className = 'plato-nombre';
+          name.textContent = p.nombre || '';
 
-                    card.appendChild(info);
-                    container.appendChild(card);
-                });
-            });
+          const desc = document.createElement('p');
+          desc.className = 'plato-desc';
+          desc.textContent = p.descripcion || '';
 
-            // Log para depuración: cuántas imágenes se han intentado renderizar
-            console.info('Renderizado completado. Categorías:', (content.categorias || []).length);
-        }
+          const footer = document.createElement('div');
+          footer.className = 'plato-footer';
 
-        function descargarPDF() {
-            const element = document.getElementById('pdf-content');
-            const controls = document.querySelector('.controls-container');
-            if (controls) controls.style.display = 'none';
+          const price = document.createElement('div');
+          price.className = 'plato-precio';
+          price.textContent = (p.precio !== undefined && p.precio !== null) ? `${p.precio}€` : '';
 
-            const opt = {
-                margin:       10,
-                filename:     'menu-restaurante.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0f0f0f' },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+          footer.appendChild(price);
+          body.appendChild(name);
+          body.appendChild(desc);
+          body.appendChild(footer);
 
-            // Aseguramos que las imágenes hayan terminado de cargarse en el DOM antes de generar el PDF
-            const imgs = Array.from(document.querySelectorAll('#menu-container img'));
-            const loadPromises = imgs.map(img => new Promise(res => {
-                if (img.complete) return res();
-                img.addEventListener('load', () => res());
-                img.addEventListener('error', () => res());
-            }));
+          card.appendChild(media);
+          card.appendChild(body);
+          grid.appendChild(card);
+        });
 
-            Promise.all(loadPromises).then(() => {
-                html2pdf().set(opt).from(element).save().then(() => {
-                    if (controls) controls.style.display = 'flex';
-                }).catch(err => {
-                    console.error('Error generando PDF:', err);
-                    if (controls) controls.style.display = 'flex';
-                });
-            });
-        }
-    </script>
+        container.appendChild(grid);
+      });
+
+      console.info('Renderizado OK. Categorías:', (content.categorias || []).length);
+    }
+
+    // Construye dinámicamente el panel de idiomas según menuData.traducciones
+    function buildLangPanel() {
+      const panel = document.getElementById('lang-panel');
+      panel.innerHTML = '';
+      const langs = menuData?.traducciones ? Object.keys(menuData.traducciones) : ['es','en'];
+      // Asegurar que 'es' esté al principio
+      if (!langs.includes('es')) langs.unshift('es');
+
+      langs.forEach(code => {
+        const item = document.createElement('div');
+        item.className = 'lang-item';
+        item.onclick = () => { changeLanguage(code); };
+
+        const flagWrap = document.createElement('div');
+        flagWrap.className = 'lang-flag';
+        const img = document.createElement('img');
+        const file = FLAG_MAP[code] || `${code}.png`;
+        img.src = `${FLAG_DIR}${file}`;
+        img.alt = code;
+        flagWrap.appendChild(img);
+
+        const label = document.createElement('div');
+        label.className = 'lang-label';
+        // Si el JSON incluye meta.languageName, lo usamos
+        const labelText = (menuData?.traducciones?.[code]?.meta?.languageName) || (code.toUpperCase());
+        label.textContent = labelText;
+
+        item.appendChild(flagWrap);
+        item.appendChild(label);
+        panel.appendChild(item);
+      });
+    }
+
+    function changeLanguage(code) {
+      const file = FLAG_MAP[code] || `${code}.png`;
+      document.getElementById('current-flag').src = `${FLAG_DIR}${file}`;
+      document.getElementById('lang-panel').classList.remove('active');
+      document.getElementById('lang-panel').setAttribute('aria-hidden','true');
+      renderMenu(code);
+    }
+
+    // PDF generation: oculta controles, espera imágenes y genera PDF
+    function descargarPDF() {
+      const element = document.getElementById('pdf-content');
+      const controls = document.querySelector('.controls-container');
+      if (controls) controls.style.display = 'none';
+
+      const opt = {
+        margin: 10,
+        filename: 'menu-restaurante.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0f0f0f' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // Esperar a que las imágenes del DOM terminen de cargar
+      const imgs = Array.from(document.querySelectorAll('#menu-container img'));
+      const loads = imgs.map(img => new Promise(res => {
+        if (img.complete) return res();
+        img.addEventListener('load', () => res());
+        img.addEventListener('error', () => res());
+      }));
+
+      Promise.all(loads).then(() => {
+        html2pdf().set(opt).from(element).save().then(() => {
+          if (controls) controls.style.display = 'flex';
+        }).catch(err => {
+          console.error('Error generando PDF:', err);
+          if (controls) controls.style.display = 'flex';
+        });
+      });
+    }
+
+    // -------------------------
+    // Eventos UI
+    // -------------------------
+    document.getElementById('btn-lang').addEventListener('click', () => {
+      const panel = document.getElementById('lang-panel');
+      panel.classList.toggle('active');
+      panel.setAttribute('aria-hidden', panel.classList.contains('active') ? 'false' : 'true');
+    });
+    document.getElementById('btn-pdf').addEventListener('click', descargarPDF);
+
+    // -------------------------
+    // Inicialización: leer hash
+    // -------------------------
+    window.addEventListener('load', () => {
+      const hash = window.location.hash.substring(1);
+      if (!hash) {
+        document.getElementById('restaurant-title').textContent = 'Escanea un QR válido';
+        return;
+      }
+      menuData = decodeHash(hash);
+      if (!menuData) {
+        document.getElementById('restaurant-title').textContent = 'Error leyendo menú';
+        return;
+      }
+      // Construir panel idiomas y renderizar
+      buildLangPanel();
+      // Si el JSON incluye un idioma por defecto, úsalo
+      const defaultLang = menuData.defaultLang || 'es';
+      changeLanguage(defaultLang);
+    });
+  </script>
 </body>
 </html>
