@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Digital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
     <style>
-        /* General Body & Theme */
+        /* GENERAL */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
@@ -15,7 +16,21 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Header */
+        /* DARK MODE */
+        body.dark-mode {
+            background-color: #1e1e1e !important;
+            color: #f8f9fa !important;
+        }
+        body.dark-mode header {
+            background-color: #2c2c2c !important;
+            color: #fff !important;
+        }
+        body.dark-mode .dish {
+            background-color: #2c2f33 !important;
+            color: #fff !important;
+        }
+
+        /* HEADER */
         header {
             background-color: #ffffff;
             padding: 20px;
@@ -26,6 +41,7 @@
             z-index: 100;
             border-bottom: 1px solid #dee2e6;
         }
+
         #restaurant-logo {
             max-height: 80px;
             max-width: 80px;
@@ -34,11 +50,14 @@
             border: 3px solid #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         #restaurant-name {
             font-size: 2.2em;
             margin: 10px 0;
             font-weight: 700;
         }
+
+        /* LANGUAGE SELECTOR WITH FLAGS */
         #language-selector {
             padding: 10px 15px;
             font-size: 1em;
@@ -46,14 +65,18 @@
             border: 1px solid #ced4da;
             background-color: #fff;
             margin-bottom: 10px;
+            background-repeat: no-repeat;
+            background-position: 8px center;
+            background-size: 22px 16px;
+            padding-left: 36px;
         }
 
-        /* Main Container */
         #menu-container {
             padding: 20px;
             max-width: 800px;
             margin: 20px auto;
         }
+
         #loader {
             text-align: center;
             padding: 50px;
@@ -61,7 +84,7 @@
             color: #6c757d;
         }
 
-        /* Category Styling */
+        /* CATEGORY */
         .category {
             margin-bottom: 40px;
         }
@@ -74,7 +97,7 @@
             margin-bottom: 25px;
         }
 
-        /* Dish Styling */
+        /* DISH */
         .dish {
             display: flex;
             gap: 15px;
@@ -118,154 +141,198 @@
             align-self: flex-end;
         }
 
-        /* Template: clasica */
+        /* TEMPLATE: CLÁSICA */
         body.template-clasica .category-title {
             font-family: "Times New Roman", serif;
-            border-bottom-color: #8B4513; /* SaddleBrown */
+            border-bottom-color: #8B4513;
         }
         body.template-clasica .dish { border: 1px solid #ddd; }
 
-        /* Template: rustica */
-        body.template-rustica { background-color: #f5f5dc; /* Beige */ }
+        /* TEMPLATE: RÚSTICA */
+        body.template-rustica { background-color: #f5f5dc; }
         body.template-rustica header { background-color: #D2B48C; border-bottom-color: #8B4513; }
         body.template-rustica .category-title { color: #556B2F; border-bottom-color: #556B2F; }
         body.template-rustica .dish { background-color: #fffef0; border: 1px solid #D2B48C; }
 
+        /* BUTTONS */
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-pdf {
+            background: #007bff;
+            color: white;
+        }
+        .btn-theme {
+            background: #343a40;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
 
-    <header id="header-container" style="display: none;">
-        <img id="restaurant-logo" src="" alt="Logo del restaurante">
-        <h1 id="restaurant-name"></h1>
+<header id="header-container" style="display:none;">
+    <img id="restaurant-logo" src="" alt="Logo del restaurante">
+    <h1 id="restaurant-name"></h1>
+
+    <div class="top-buttons">
         <select id="language-selector"></select>
-    </header>
-
-    <div id="menu-container">
-        <div id="loader">Cargando menú...</div>
+        <button id="btn-pdf" class="btn btn-pdf">📄 PDF</button>
+        <button id="btn-theme" class="btn btn-theme">🌙 / ☀️</button>
     </div>
+</header>
 
-    <script>
-        const REPO_OWNER = 'wiissdeveloperapps-hub';
-        const REPO_NAME = 'menuforgeviews';
-        let fullMenuData = null;
+<div id="menu-container">
+    <div id="loader">Cargando menú...</div>
+</div>
 
-        const dom = {
-            loader: document.getElementById('loader'),
-            header: document.getElementById('header-container'),
-            restaurantLogo: document.getElementById('restaurant-logo'),
-            restaurantName: document.getElementById('restaurant-name'),
-            langSelector: document.getElementById('language-selector'),
-            menuContainer: document.getElementById('menu-container')
-        };
+<script>
+    const REPO_OWNER = 'wiissdeveloperapps-hub';
+    const REPO_NAME = 'menuforgeviews';
+    let fullMenuData = null;
 
-        document.addEventListener('DOMContentLoaded', init);
+    const dom = {
+        loader: document.getElementById('loader'),
+        header: document.getElementById('header-container'),
+        restaurantLogo: document.getElementById('restaurant-logo'),
+        restaurantName: document.getElementById('restaurant-name'),
+        langSelector: document.getElementById('language-selector'),
+        menuContainer: document.getElementById('menu-container')
+    };
 
-        async function init() {
-            try {
-                const hash = window.location.hash.substring(1);
-                let menuData;
+    document.addEventListener('DOMContentLoaded', init);
 
-                if (hash.startsWith('pako:')) {
-                    menuData = decompressPako(hash.substring(5));
-                } else if (hash.startsWith('remote:')) {
-                    menuData = await fetchRemote(hash.substring(7));
-                } else {
-                    showError('Formato de URL no válido o menú no encontrado.');
-                    return;
-                }
+    async function init() {
+        try {
+            const hash = window.location.hash.substring(1);
+            let menuData;
 
-                if (!menuData || !menuData.traducciones) {
-                    showError('No se pudieron cargar los datos del menú o el formato es incorrecto.');
-                    return;
-                }
-                setupUI(menuData);
-            } catch (error) {
-                console.error('Error al inicializar:', error);
-                showError('Ha ocurrido un error al cargar el menú.');
-            }
-        }
-
-        function decompressPako(base64String) {
-            try {
-                const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
-                const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
-                return JSON.parse(decompressed);
-            } catch (error) {
-                console.error('Error al descomprimir:', error);
-                throw new Error('Los datos del menú están corruptos.');
-            }
-        }
-
-        async function fetchRemote(id) {
-            const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
-            return await response.json();
-        }
-
-        function setupUI(data) {
-            fullMenuData = data;
-            dom.loader.style.display = 'none';
-            dom.header.style.display = 'block';
-
-            dom.langSelector.innerHTML = '';
-            Object.keys(fullMenuData.traducciones).forEach(langCode => {
-                const option = document.createElement('option');
-                option.value = langCode;
-                option.textContent = fullMenuData.traducciones[langCode].meta.languageName;
-                dom.langSelector.appendChild(option);
-            });
-
-            const browserLang = navigator.language.split('-')[0];
-            const initialLang = fullMenuData.traducciones[browserLang] ? browserLang : Object.keys(fullMenuData.traducciones)[0];
-            dom.langSelector.value = initialLang;
-
-            renderMenu(initialLang);
-            dom.langSelector.addEventListener('change', (e) => renderMenu(e.target.value));
-        }
-
-        function renderMenu(langCode) {
-            if (!fullMenuData) return;
-            const langData = fullMenuData.traducciones[langCode];
-            if (!langData) {
-                showError(`Traducción no disponible para: ${langCode}`);
+            if (hash.startsWith('pako:')) {
+                menuData = decompressPako(hash.substring(5));
+            } else if (hash.startsWith('remote:')) {
+                menuData = await fetchRemote(hash.substring(7));
+            } else {
+                showError('Formato de URL no válido o menú no encontrado.');
                 return;
             }
 
-            dom.restaurantLogo.src = fullMenuData.logoRestaurante || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-            dom.restaurantName.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
-            document.body.className = `template-${fullMenuData.plantilla || 'moderna'}`;
+            if (!menuData || !menuData.traducciones) {
+                showError('No se pudieron cargar los datos del menú o el formato es incorrecto.');
+                return;
+            }
+            setupUI(menuData);
+        } catch (error) {
+            console.error('Error al inicializar:', error);
+            showError('Ha ocurrido un error al cargar el menú.');
+        }
+    }
 
-            let menuHtml = langData.categorias?.map(category => `
-                <div class="category">
-                    <h2 class="category-title">${category.nombre}</h2>
-                    ${category.platos?.map(dish => `
-                        <div class="dish">
-                            ${dish.imagen ? `<img class="dish-img" src="${dish.imagen}" alt="${dish.nombre}">` : ''}
-                            <div class="dish-details">
-                                <div class="dish-name">${dish.nombre}</div>
-                                <p class="dish-desc">${dish.descripcion || ''}</p>
-                                <div class="dish-price">${formatPrice(dish.precio)}</div>
-                            </div>
+    function decompressPako(base64String) {
+        try {
+            const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
+            const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
+            return JSON.parse(decompressed);
+        } catch (error) {
+            console.error('Error al descomprimir:', error);
+            throw new Error('Los datos del menú están corruptos.');
+        }
+    }
+
+    async function fetchRemote(id) {
+        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
+        return await response.json();
+    }
+
+    function setupUI(data) {
+        fullMenuData = data;
+        dom.loader.style.display = 'none';
+        dom.header.style.display = 'block';
+
+        dom.langSelector.innerHTML = '';
+
+        Object.keys(fullMenuData.traducciones).forEach(langCode => {
+            const option = document.createElement('option');
+            option.value = langCode;
+            option.textContent = fullMenuData.traducciones[langCode].meta.languageName;
+
+            // BANDERAS LOCALES
+            option.style.backgroundImage = `url(assets/flags/${langCode}.png)`;
+
+            dom.langSelector.appendChild(option);
+        });
+
+        const browserLang = navigator.language.split('-')[0];
+        const initialLang = fullMenuData.traducciones[browserLang] ? browserLang : Object.keys(fullMenuData.traducciones)[0];
+        dom.langSelector.value = initialLang;
+
+        renderMenu(initialLang);
+        dom.langSelector.addEventListener('change', (e) => renderMenu(e.target.value));
+    }
+
+    function renderMenu(langCode) {
+        if (!fullMenuData) return;
+        const langData = fullMenuData.traducciones[langCode];
+        if (!langData) {
+            showError(`Traducción no disponible para: ${langCode}`);
+            return;
+        }
+
+        dom.restaurantLogo.src = fullMenuData.logoRestaurante || '';
+        dom.restaurantName.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
+        document.body.className = `template-${fullMenuData.plantilla || 'moderna'}`;
+
+        let menuHtml = langData.categorias?.map(category => `
+            <div class="category">
+                <h2 class="category-title">${category.nombre}</h2>
+                ${category.platos?.map(dish => `
+                    <div class="dish">
+                        ${dish.imagen ? `<img class="dish-img" src="${dish.imagen}" alt="${dish.nombre}">` : ''}
+                        <div class="dish-details">
+                            <div class="dish-name">${dish.nombre}</div>
+                            <p class="dish-desc">${dish.descripcion || ''}</p>
+                            <div class="dish-price">${formatPrice(dish.precio)}</div>
                         </div>
-                    `).join('') || ''}
-                </div>
-            `).join('') || '<p>Este menú está vacío.</p>';
+                    </div>
+                `).join('') || ''}
+            </div>
+        `).join('') || '<p>Este menú está vacío.</p>';
 
-            dom.menuContainer.innerHTML = menuHtml;
-        }
+        dom.menuContainer.innerHTML = menuHtml;
+    }
 
-        function formatPrice(price) {
-            if (typeof price !== 'number') return '';
-            return price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-        }
+    function formatPrice(price) {
+        if (typeof price !== 'number') return '';
+        return price.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    }
 
-        function showError(message) {
-            dom.loader.style.display = 'none';
-            dom.menuContainer.innerHTML = `<p style="color: red; text-align: center; font-size: 1.2em;">${message}</p>`;
-        }
-    </script>
+    function showError(message) {
+        dom.loader.style.display = 'none';
+        dom.menuContainer.innerHTML = `<p style="color: red; text-align: center; font-size: 1.2em;">${message}</p>`;
+    }
+
+    /* PDF */
+    document.getElementById('btn-pdf').addEventListener('click', () => {
+        window.print();
+    });
+
+    /* DARK MODE */
+    document.getElementById('btn-theme').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+    });
+
+</script>
 
 </body>
 </html>
