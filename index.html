@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Digital</title>
+    <!-- Añadimos LZ-String para la descompresión -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
     <style>
@@ -326,8 +328,28 @@
     async function fetchRemote(id) {
         const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`;
         const response = await fetch(url);
-        if (!response.ok) throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
-        return await response.json();
+        if (!response.ok) {
+            throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
+        }
+
+        const rawText = await response.text();
+
+        // Primero intentamos descomprimir. Si LZString devuelve null o "",
+        // significa que el texto probablemente no estaba comprimido.
+        let jsonString = LZString.decompressFromEncodedURIComponent(rawText);
+
+        if (!jsonString) {
+            // Si la descompresión falla, asumimos que el contenido es JSON sin comprimir (para compatibilidad con menús antiguos).
+            console.warn("No se pudo descomprimir con LZString, intentando parsear como JSON directo.");
+            jsonString = rawText;
+        }
+
+        try {
+            return JSON.parse(jsonString);
+        } catch (e) {
+            console.error("Error final al parsear el JSON:", e, "Contenido recibido:", rawText);
+            throw new Error('Error al analizar los datos del menú. El formato es incorrecto.');
+        }
     }
 
     function setupUI(data) {
