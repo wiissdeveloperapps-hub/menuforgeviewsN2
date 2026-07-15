@@ -337,6 +337,53 @@
         .modal-desc { color: var(--text-muted); font-size: 1em; line-height: 1.5; margin: 0; }
 
         #loader { text-align: center; padding: 50px; color: var(--text-muted); font-weight: 600; }
+    
+    /* ================= HEADER COMPACTO EN MOVIL ================= */
+@media (max-width: 480px) {
+
+    header {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .header-identity {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #restaurant-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    #restaurant-name {
+        font-size: 1.1em;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Meta pills más compactas */
+    .restaurant-meta {
+        margin-top: 4px;
+        gap: 6px;
+        padding-bottom: 2px;
+    }
+
+    .meta-pill {
+        padding: 4px 10px;
+        font-size: 0.75em;
+        border-radius: 16px;
+    }
+
+    .meta-pill svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+    
     </style>
 </head>
 
