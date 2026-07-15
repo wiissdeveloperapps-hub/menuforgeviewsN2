@@ -2,319 +2,261 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menú Digital</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* GENERAL */
-        body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f6f8;
-            color: #1a1a1a;
-            transition: background-color 0.4s ease, color 0.4s ease;
+        /* ================= VARIABLES Y TEMA ================= */
+        :root {
+            --bg-color: #f4f6f8;
+            --surface-color: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #6c757d;
+            --primary: #007bff;
+            --border-color: #eaeaea;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        /* DARK MODE — CONTRASTE ALTO */
         body.dark-mode {
-            background-color: #0f0f11 !important;
-            color: #f1f1f1 !important;
-        }
-        body.dark-mode header {
-            background-color: #161618 !important;
-            color: #ffffff !important;
-            border-bottom-color: #2a2a2d !important;
-        }
-        body.dark-mode .restaurant-meta a {
-            color: #a0a0a5 !important;
-        }
-        body.dark-mode .restaurant-meta a:hover {
-            color: #007bff !important;
-        }
-        body.dark-mode .category-title {
-            color: #ffffff !important;
-            border-bottom-color: #007bff !important;
-        }
-        body.dark-mode .dish {
-            background-color: #1c1c1f !important;
-            color: #f1f1f1 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-        }
-        body.dark-mode .dish:hover {
-            box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
-        }
-        body.dark-mode .dish-name {
-            color: #ffffff !important;
-        }
-        body.dark-mode .dish-desc {
-            color: #a0a0a5 !important;
-        }
-        body.dark-mode .dish-price {
-            color: #ffffff !important;
-        }
-        body.dark-mode .lang-selector-wrap {
-            background-color: #252528 !important;
-            border-color: #3a3a3e !important;
-        }
-        body.dark-mode #language-selector {
-            color: #ffffff !important;
-        }
-        body.dark-mode .btn-theme {
-            background-color: #333 !important;
-            color: #fff !important;
-        }
-        body.dark-mode .modal-content {
-            background: #1c1c1f;
-            color: #f1f1f1;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-        }
-        body.dark-mode .modal-desc {
-            color: #a0a0a5;
-        }
-        /* Selector visible en modo oscuro */
-        body.dark-mode select,
-        body.dark-mode select option {
-            background-color: #252528 !important;
-            color: #ffffff !important;
-        }
-        body.dark-mode select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            --bg-color: #0f0f11;
+            --surface-color: #1c1c1f;
+            --text-main: #f1f1f1;
+            --text-muted: #a0a0a5;
+            --primary: #3b82f6;
+            --border-color: #2a2a2d;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 15px rgba(0,0,0,0.6);
         }
 
-        /* HEADER OPTIMIZADO PARA MÓVIL */
-        header {
-            background-color: #ffffff;
-            padding: 15px 10px; /* Reducido padding superior/inferior */
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid #eaeaea;
-            transition: all 0.4s ease;
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .header-top-row {
+        /* ================= UTILITY TOP BAR (Idiomas y Tema) ================= */
+        .top-utility-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 0 5px;
+            padding: 8px 15px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        #restaurant-logo {
-            max-height: 60px; /* Reducido tamaño del logo */
-            max-width: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: inline-block;
-        }
-
-        #restaurant-name {
-            font-size: 1.6em; /* Fuente más compacta */
-            margin: 0;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1.1;
-        }
-
-        /* RESTAURANT META INFO (Más compacto) */
-        .restaurant-meta {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px 15px; /* Menor gap */
-            margin-top: 10px;
-            font-size: 0.85em; /* Texto más pequeño */
-            color: #6c757d;
-        }
-
-        .restaurant-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .restaurant-meta a {
-            color: inherit;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .restaurant-meta a:hover {
-            color: #007bff;
-        }
-
-        .meta-icon {
-            width: 14px; /* Icono más pequeño */
-            height: 14px;
-            fill: currentColor;
-        }
-
-        /* TOP BUTTONS EN HEADER */
-        .header-actions {
+        .language-flags-container {
             display: flex;
             gap: 8px;
             align-items: center;
+            overflow-x: auto;
         }
 
-        /* LANGUAGE SELECTOR MODERNO */
-        .lang-selector-wrap {
+        .flag-button {
+            background: none;
+            border: 2px solid transparent;
+            padding: 2px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 6px 10px; /* Más compacto */
-            border-radius: 10px;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .lang-selector-wrap:hover {
-            border-color: #007bff;
-        }
-
-        .lang-flag {
-            width: 20px; /* Bandera más pequeña */
-            height: 15px;
-            border-radius: 3px;
-            object-fit: cover;
-        }
-
-        #language-selector {
-            border: none;
-            background: transparent;
-            font-size: 0.9em; /* Texto más pequeño */
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            padding-right: 2px;
-            outline: none;
-        }
-
-        /* BUTTONS */
-        .btn {
-            padding: 6px 10px; /* Más compacto */
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.85em; /* Texto más pequeño */
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        .btn-pdf {
-            background: #dc3545;
-            color: white;
-            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
-        }
-        .btn-theme {
-            background: #212529;
-            color: white;
-            width: 34px; /* Más pequeño */
-            height: 34px;
-            border-radius: 10px;
-            display: flex;
             justify-content: center;
-            align-items: center;
-            font-size: 1.1em;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        .flag-button img {
+            width: 24px;
+            height: 18px;
+            border-radius: 4px;
+            object-fit: cover;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .flag-button.active {
+            opacity: 1;
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .action-buttons { display: flex; gap: 8px; }
+        .icon-btn {
+            background: var(--bg-color);
+            color: var(--text-main);
             border: none;
-            transition: transform 0.2s ease;
-        }
-        .btn-theme:hover {
-            transform: scale(1.05) rotate(5deg);
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
         }
 
-        /* MENU */
-        #menu-container {
+        /* ================= CABECERA COMPACTA ================= */
+        header {
+            background-color: var(--surface-color);
             padding: 15px;
-            max-width: 800px;
-            margin: 0 auto 20px auto;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        #loader {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.3em;
-            color: #6c757d;
-            font-weight: 600;
+        .header-identity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* CATEGORY */
-        .category {
-            margin-bottom: 40px;
+        #restaurant-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: var(--shadow-sm);
         }
-        .category-title {
-            font-size: 1.6em; /* Reducido */
+
+        #restaurant-name {
+            font-size: 1.4em;
             font-weight: 800;
-            color: #1a1a1a;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 8px;
-            margin-bottom: 20px;
+            margin: 0;
+            line-height: 1.1;
         }
 
-        /* DISH CARD (ULTRA PREMIUM) */
+        .restaurant-meta {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none; 
+        }
+        .restaurant-meta::-webkit-scrollbar { display: none; }
+
+        .meta-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+        }
+        .meta-pill svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* ================= NAVEGACIÓN STICKY ================= */
+        .category-nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 15px;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            scrollbar-width: none;
+        }
+        .category-nav::-webkit-scrollbar { display: none; }
+
+        .cat-tab {
+            background: var(--bg-color);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .cat-tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* ================= MENÚ ================= */
+        #menu-container {
+            padding: 20px 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+            scroll-margin-top: 80px; 
+        }
+        
+        .category-title {
+            font-size: 1.4em;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .category-title::after {
+            content: "";
+            flex-grow: 1;
+            height: 2px;
+            background-color: var(--border-color);
+            border-radius: 2px;
+        }
+
         .dish {
             display: flex;
             gap: 12px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            margin-bottom: 16px;
-            overflow: hidden;
+            background-color: var(--surface-color);
+            border-radius: 14px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+            padding: 10px;
             cursor: pointer; 
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-            position: relative;
-        }
-        .dish:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
         }
         
         .dish-img {
-            width: 100px; /* Imagen más pequeña */
-            height: 100px;
+            width: 90px;
+            height: 90px;
+            border-radius: 10px;
             object-fit: cover;
             flex-shrink: 0;
+            background-color: var(--bg-color);
         }
         
         .dish-details {
-            padding: 12px 12px 12px 0;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-        }
-        
-        .dish:not(:has(.dish-img)) .dish-details {
-            padding-left: 12px;
+            min-width: 0; 
         }
 
         .dish-name {
-            font-size: 1.15em;
+            font-size: 1.1em;
             font-weight: 700;
             margin: 0 0 4px;
-            letter-spacing: -0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .dish-desc {
-            color: #6c757d;
+            color: var(--text-muted);
             margin: 0 0 8px;
             font-size: 0.85em;
             line-height: 1.3;
@@ -322,214 +264,116 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .dish-bottom-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
         }
         
         .dish-price {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 800;
+            color: var(--primary);
+            margin-top: auto;
         }
 
-        /* ICONO DE ACCIÓN EN LA TARJETA (CHEVRON) */
-        .dish-action-icon {
-            background: rgba(0, 123, 255, 0.1);
-            color: #007bff;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .dish-action-icon svg {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .dish:hover .dish-action-icon {
-            background: #007bff;
-            color: #ffffff;
-            transform: translateX(4px);
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-        }
-
-        /* ANIMACIONES DE ENTRADA (SLIDE-IN) */
-        .fade-in-slide {
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .fade-in-slide.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        /* MODAL POPUP */
+        /* ================= MODAL ================= */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             display: flex;
-            align-items: center;
+            align-items: flex-end; 
             justify-content: center;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
         .modal-content {
-            background: #ffffff;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
+            background: var(--surface-color);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             max-height: 85vh;
             overflow-y: auto;
             position: relative;
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0) scale(1);
-        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
         
+        @media (min-width: 600px) {
+            .modal-overlay { align-items: center; padding: 20px; }
+            .modal-content { border-radius: 24px; transform: scale(0.95); }
+            .modal-overlay.active .modal-content { transform: scale(1); }
+        }
+
         .modal-close {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.05);
-            color: #333;
+            top: 15px; right: 15px;
+            background: var(--bg-color);
+            color: var(--text-main);
             border: none;
+            width: 32px; height: 32px;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 1em;
+            font-size: 1.2em;
             cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
         }
-        body.dark-mode .modal-close {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        .modal-close:hover {
-            background: #dc3545;
-            color: white;
-            transform: scale(1.1);
-        }
-        
-        .modal-img-wrapper {
-            text-align: center;
-            padding-top: 30px;
-        }
+
         .modal-img {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 200px;
             object-fit: cover;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-            display: inline-block;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
         }
 
-        .modal-body {
-            padding: 20px 25px 25px;
-            text-align: center;
-        }
-        .modal-title {
-            font-size: 1.5em;
-            font-weight: 800;
-            margin: 0 0 10px;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-        }
-        
-        .modal-price {
-            font-size: 1.4em;
-            font-weight: 800;
-            color: #1a1a1a; 
-            display: inline-block;
-            padding: 6px 18px;
-            background: rgba(0, 0, 0, 0.04);
-            border-radius: 10px;
-            letter-spacing: -0.5px;
-            margin-bottom: 15px;
-        }
-        body.dark-mode .modal-price {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.08);
-        }
+        .modal-title { font-size: 1.6em; font-weight: 800; margin: 0 0 10px; }
+        .modal-price { font-size: 1.4em; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+        .modal-desc { color: var(--text-muted); font-size: 1em; line-height: 1.5; margin: 0; }
 
-        .modal-desc {
-            color: #555;
-            font-size: 0.95em;
-            line-height: 1.5;
-            margin: 0;
-        }
-
+        #loader { text-align: center; padding: 50px; color: var(--text-muted); font-weight: 600; }
     </style>
 </head>
 
 <body>
 
-<header id="header-container" style="display:none;">
-    <div class="header-top-row">
-        <div class="header-actions">
-            <div class="lang-selector-wrap">
-                <img id="current-flag" class="lang-flag" src="assets/flags/es.png" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
-                <select id="language-selector"></select>
+<div id="app-wrapper" style="display:none;">
+    <div class="top-utility-bar">
+        <div class="language-flags-container" id="language-flags">
             </div>
-        </div>
-
-        <img id="restaurant-logo" src="" alt="Logo">
-
-        <div class="header-actions">
-            <button id="btn-pdf" class="btn btn-pdf" title="Descargar PDF">
-                📄
-            </button>
-            <button id="btn-theme" class="btn-theme" title="Cambiar Tema">
-                🌙
-            </button>
+        <div class="action-buttons">
+            <button id="btn-pdf" class="icon-btn" title="Descargar PDF">📄</button>
+            <button id="btn-theme" class="icon-btn" title="Cambiar Tema">🌙</button>
         </div>
     </div>
 
-    <h1 id="restaurant-name"></h1>
-    <div id="restaurant-meta" class="restaurant-meta"></div>
-</header>
+    <header>
+        <div class="header-identity">
+            <img id="restaurant-logo" src="" alt="Logo">
+            <h1 id="restaurant-name"></h1>
+        </div>
+        <div id="restaurant-meta" class="restaurant-meta"></div>
+    </header>
 
-<div id="menu-container">
-    <div id="loader">Cargando menú...</div>
+    <nav class="category-nav" id="category-nav"></nav>
+
+    <div id="menu-container"></div>
 </div>
+
+<div id="loader">Cargando menú...</div>
 
 <div id="dish-modal" class="modal-overlay">
     <div class="modal-content">
         <button id="modal-close" class="modal-close">✖</button>
-        
-        <div id="modal-img-wrapper" class="modal-img-wrapper" style="display: none;">
-            <img id="modal-img" class="modal-img" src="" alt="Imagen del plato">
-        </div>
-
-        <div class="modal-body">
-            <h3 id="modal-title" class="modal-title"></h3>
-            <div id="modal-price" class="modal-price"></div>
-            <p id="modal-desc" class="modal-desc"></p>
-        </div>
+        <img id="modal-img" class="modal-img" src="" alt="" style="display: none;">
+        <h3 id="modal-title" class="modal-title"></h3>
+        <div id="modal-price" class="modal-price"></div>
+        <p id="modal-desc" class="modal-desc"></p>
     </div>
 </div>
 
@@ -537,16 +381,18 @@
     const REPO_OWNER = 'wiissdeveloperapps-hub';
     const REPO_NAME = 'menuforgeviews';
     let fullMenuData = null;
+    let currentLang = '';
 
     const dom = {
+        appWrapper: document.getElementById('app-wrapper'),
         loader: document.getElementById('loader'),
-        header: document.getElementById('header-container'),
-        restaurantLogo: document.getElementById('restaurant-logo'),
-        restaurantName: document.getElementById('restaurant-name'),
-        restaurantMeta: document.getElementById('restaurant-meta'),
-        langSelector: document.getElementById('language-selector'),
-        currentFlag: document.getElementById('current-flag'),
-        menuContainer: document.getElementById('menu-container')
+        logo: document.getElementById('restaurant-logo'),
+        name: document.getElementById('restaurant-name'),
+        meta: document.getElementById('restaurant-meta'),
+        flagsContainer: document.getElementById('language-flags'),
+        categoryNav: document.getElementById('category-nav'),
+        menuContainer: document.getElementById('menu-container'),
+        modal: document.getElementById('dish-modal')
     };
 
     document.addEventListener('DOMContentLoaded', init);
@@ -566,179 +412,59 @@
             }
 
             if (!menuData || !menuData.traducciones) {
-                showError('No se pudieron cargar los datos del menú o el formato es incorrecto.');
+                showError('Datos del menú corruptos.');
                 return;
             }
-            setupUI(menuData);
+            
+            fullMenuData = menuData;
+            
+            // Determinar idioma inicial
+            const browserLang = navigator.language.split('-')[0];
+            currentLang = fullMenuData.traducciones[browserLang] ? browserLang : Object.keys(fullMenuData.traducciones)[0];
+            
+            buildLanguageSelector();
+            renderHeader();
+            renderMenuContent();
+
+            dom.loader.style.display = 'none';
+            dom.appWrapper.style.display = 'block';
+
         } catch (error) {
-            console.error('Error al inicializar:', error);
+            console.error(error);
             showError('Ha ocurrido un error al cargar el menú.');
         }
     }
 
+    // --- UTILIDADES ---
     function decompressPako(base64String) {
-        try {
-            const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
-            const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
-            return JSON.parse(decompressed);
-        } catch (error) {
-            console.error('Error al descomprimir:', error);
-            throw new Error('Los datos del menú están corruptos.');
-        }
+        const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
+        const decompressed = pako.inflate(new Uint8Array(compressed), { to: 'string' });
+        return JSON.parse(decompressed);
     }
 
     async function fetchRemote(id) {
         const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/contents/menus/${id}.json`;
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`No se pudo encontrar el menú remoto (ID: ${id})`);
-        }
-
+        if (!response.ok) throw new Error(`Menú remoto no encontrado (${id})`);
         const rawText = await response.text();
         let jsonString = LZString.decompressFromEncodedURIComponent(rawText);
-
-        if (!jsonString) {
-            console.warn("No se pudo descomprimir con LZString, intentando parsear como JSON directo.");
-            jsonString = rawText;
-        }
-
-        try {
-            return JSON.parse(jsonString);
-        } catch (e) {
-            console.error("Error final al parsear el JSON:", e, "Contenido recibido:", rawText);
-            throw new Error('Error al analizar los datos del menú. El formato es incorrecto.');
-        }
+        if (!jsonString) jsonString = rawText;
+        return JSON.parse(jsonString);
     }
 
-    function setupUI(data) {
-        fullMenuData = data;
-        dom.loader.style.display = 'none';
-        dom.header.style.display = 'block';
-
-        dom.langSelector.innerHTML = '';
-
-        Object.keys(fullMenuData.traducciones).forEach(langCode => {
-            const option = document.createElement('option');
-            option.value = langCode;
-            option.textContent = fullMenuData.traducciones[langCode].meta.languageName;
-            dom.langSelector.appendChild(option);
-        });
-
-        const browserLang = navigator.language.split('-')[0];
-        const initialLang = fullMenuData.traducciones[browserLang] ? browserLang : Object.keys(fullMenuData.traducciones)[0];
-        dom.langSelector.value = initialLang;
-
-        dom.currentFlag.src = `assets/flags/${initialLang}.png`;
-
-        renderMenu(initialLang);
-
-        dom.langSelector.addEventListener('change', (e) => {
-            const lang = e.target.value;
-            dom.currentFlag.src = `assets/flags/${lang}.png`;
-            renderMenu(lang);
-        });
-    }
-
+    // FIX APLICADO AQUÍ: Sintaxis de JS completamente arreglada y segura para HTML entities.
     function escapeHTML(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, function(match) {
-            return {
+            const escapeMap = {
                 '&': '&amp;',
                 '<': '&lt;',
                 '>': '&gt;',
                 '"': '&quot;',
                 "'": '&#39;'
-            }[match];
+            };
+            return escapeMap[match];
         });
-    }
-
-    function renderMenu(langCode) {
-        if (!fullMenuData) return;
-        const langData = fullMenuData.traducciones[langCode];
-        if (!langData) {
-            showError(`Traducción no disponible para: ${langCode}`);
-            return;
-        }
-
-        dom.restaurantLogo.src = fullMenuData.logoRestaurante || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        if(!fullMenuData.logoRestaurante) {
-            dom.restaurantLogo.style.visibility = 'hidden'; // Ocultar sin perder espacio
-        } else {
-            dom.restaurantLogo.style.visibility = 'visible';
-        }
-        
-        dom.restaurantName.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
-        document.body.className = `template-${fullMenuData.plantilla || 'moderna'}`;
-
-        let metaHtml = '';
-        
-        if (fullMenuData.telefonoRestaurante) {
-            const safePhone = escapeHTML(fullMenuData.telefonoRestaurante);
-            metaHtml += `
-                <div class="restaurant-meta-item">
-                    <svg class="meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
-                    <a href="tel:${safePhone}">${safePhone}</a>
-                </div>`;
-        }
-
-        if (fullMenuData.emailRestaurante) {
-            const safeEmail = escapeHTML(fullMenuData.emailRestaurante);
-            metaHtml += `
-                <div class="restaurant-meta-item">
-                    <svg class="meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                    <a href="mailto:${safeEmail}">${safeEmail}</a>
-                </div>`;
-        }
-
-        if (fullMenuData.direccionRestaurante) {
-            const safeDir = escapeHTML(fullMenuData.direccionRestaurante);
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullMenuData.direccionRestaurante)}`;
-            metaHtml += `
-                <div class="restaurant-meta-item">
-                    <svg class="meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                    <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${safeDir}</a>
-                </div>`;
-        }
-
-        dom.restaurantMeta.innerHTML = metaHtml;
-        dom.restaurantMeta.style.display = metaHtml ? 'flex' : 'none';
-
-        const imageMap = fullMenuData.recursos?.imagenes || {};
-
-        let menuHtml = langData.categorias?.map(category => `
-            <div class="category fade-in-slide">
-                <h2 class="category-title">${category.nombre}</h2>
-                ${category.platos?.map(dish => {
-                    const imageUrl = dish.idImagen ? imageMap[dish.idImagen] : '';
-                    const safeName = escapeHTML(dish.nombre);
-                    const safeDesc = escapeHTML(dish.descripcion);
-                    const safePrice = formatPrice(dish.precio);
-                    
-                    return `
-                    <div class="dish" data-name="${safeName}" data-desc="${safeDesc}" data-price="${safePrice}" data-img="${imageUrl}">
-                        ${imageUrl ? `<img class="dish-img" src="${imageUrl}" alt="${safeName}">` : ''}
-                        <div class="dish-details">
-                            <div class="dish-name">${safeName}</div>
-                            <p class="dish-desc">${safeDesc}</p>
-                            
-                            <div class="dish-bottom-row">
-                                <div class="dish-price">${safePrice}</div>
-                                <div class="dish-action-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="9 18 15 12 9 6"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `}).join('') || ''}
-            </div>
-        `).join('') || '<p>Este menú está vacío.</p>';
-
-        dom.menuContainer.innerHTML = menuHtml;
-
-        initScrollAnimations();
-        initModalEvents();
     }
 
     function formatPrice(price) {
@@ -748,77 +474,153 @@
 
     function showError(message) {
         dom.loader.style.display = 'none';
-        dom.menuContainer.innerHTML = `<p style="color: red; text-align: center; font-size: 1.2em;">${message}</p>`;
+        document.body.innerHTML = `<div style="padding: 50px; text-align: center; color: #dc3545;"><h3>Error</h3><p>${message}</p></div>`;
     }
 
-    function initScrollAnimations() {
-        const elements = document.querySelectorAll('.fade-in-slide');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                    }, index * 100);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.05, rootMargin: "0px 0px -50px 0px" });
+    // --- RENDERIZADO VISUAL ---
 
-        elements.forEach(el => observer.observe(el));
+    // 1. Selector de Idiomas con Banderas
+    function buildLanguageSelector() {
+        dom.flagsContainer.innerHTML = '';
+        Object.keys(fullMenuData.traducciones).forEach(langCode => {
+            const btn = document.createElement('button');
+            btn.className = `flag-button ${langCode === currentLang ? 'active' : ''}`;
+            btn.title = fullMenuData.traducciones[langCode].meta.languageName;
+            
+            // Imagen de la bandera
+            const img = document.createElement('img');
+            img.src = `assets/flags/${langCode}.png`;
+            img.onerror = () => img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            
+            btn.appendChild(img);
+            btn.addEventListener('click', () => changeLanguage(langCode));
+            dom.flagsContainer.appendChild(btn);
+        });
     }
 
-    function initModalEvents() {
-        const dishes = document.querySelectorAll('.dish');
-        const modal = document.getElementById('dish-modal');
-        const mImgWrapper = document.getElementById('modal-img-wrapper');
-        const mImg = document.getElementById('modal-img');
-        const mTitle = document.getElementById('modal-title');
-        const mDesc = document.getElementById('modal-desc');
-        const mPrice = document.getElementById('modal-price');
-        const closeBtn = document.getElementById('modal-close');
+    function changeLanguage(langCode) {
+        if (currentLang === langCode) return;
+        currentLang = langCode;
+        
+        document.querySelectorAll('.flag-button').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = Array.from(document.querySelectorAll('.flag-button')).find(b => b.querySelector('img').src.includes(`${langCode}.png`));
+        if (activeBtn) activeBtn.classList.add('active');
 
-        dishes.forEach(dish => {
-            dish.addEventListener('click', (e) => {
-                const dataset = e.currentTarget.dataset;
-                
-                mTitle.innerHTML = dataset.name;
-                mDesc.innerHTML = dataset.desc || '<i>No hay descripción disponible para este plato.</i>';
-                mPrice.innerHTML = dataset.price;
+        closeModal();
+        renderHeader();
+        renderMenuContent();
+    }
 
-                if (dataset.img) {
-                    mImg.src = dataset.img;
-                    mImgWrapper.style.display = 'block';
-                } else {
-                    mImgWrapper.style.display = 'none';
-                    mImg.src = '';
-                }
+    // 2. Cabecera e Identidad
+    function renderHeader() {
+        const langData = fullMenuData.traducciones[currentLang];
+        
+        dom.logo.src = fullMenuData.logoRestaurante || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        dom.logo.style.display = fullMenuData.logoRestaurante ? 'block' : 'none';
+        
+        dom.name.textContent = langData.nombreRestaurante || fullMenuData.nombreRestaurante || 'Restaurante';
 
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden'; 
-            });
+        let metaHtml = '';
+        if (fullMenuData.telefonoRestaurante) {
+            metaHtml += `<a href="tel:${escapeHTML(fullMenuData.telefonoRestaurante)}" class="meta-pill">
+                <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                Llamar
+            </a>`;
+        }
+        if (fullMenuData.direccionRestaurante) {
+            // FIX APLICADO AQUÍ: URL de Maps corregida con el símbolo $ en la plantilla de String
+            const url = `https://maps.google.com/?q=${encodeURIComponent(fullMenuData.direccionRestaurante)}`;
+            metaHtml += `<a href="${url}" target="_blank" class="meta-pill">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                Mapa
+            </a>`;
+        }
+        if (fullMenuData.emailRestaurante) {
+            metaHtml += `<a href="mailto:${escapeHTML(fullMenuData.emailRestaurante)}" class="meta-pill">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                Email
+            </a>`;
+        }
+        dom.meta.innerHTML = metaHtml;
+        dom.meta.style.display = metaHtml ? 'flex' : 'none';
+    }
+
+    // 3. Menú Principal y Pestañas
+    function renderMenuContent() {
+        const langData = fullMenuData.traducciones[currentLang];
+        const imageMap = fullMenuData.recursos?.imagenes || {};
+
+        let navHtml = '';
+        let menuHtml = '';
+
+        if (!langData.categorias || langData.categorias.length === 0) {
+            dom.categoryNav.innerHTML = '';
+            dom.menuContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Menú en preparación.</p>';
+            return;
+        }
+
+        langData.categorias.forEach((cat, idx) => {
+            const sectionId = `cat-${idx}`;
+            
+            navHtml += `<button class="cat-tab" onclick="document.getElementById('${sectionId}').scrollIntoView({behavior: 'smooth'})">${escapeHTML(cat.nombre)}</button>`;
+
+            menuHtml += `
+            <div id="${sectionId}" class="category-section">
+                <h2 class="category-title">${escapeHTML(cat.nombre)}</h2>
+                ${cat.platos.map(dish => {
+                    const imgUrl = dish.idImagen ? imageMap[dish.idImagen] : '';
+                    const sName = escapeHTML(dish.nombre);
+                    const sDesc = escapeHTML(dish.descripcion);
+                    const sPrice = formatPrice(dish.precio);
+
+                    return `
+                    <div class="dish" onclick="openModal('${sName}', '${sDesc}', '${sPrice}', '${imgUrl}')">
+                        ${imgUrl ? `<img class="dish-img" src="${imgUrl}" alt="">` : ''}
+                        <div class="dish-details">
+                            <h4 class="dish-name">${sName}</h4>
+                            <p class="dish-desc">${sDesc}</p>
+                            <div class="dish-price">${sPrice}</div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
         });
 
-        const closeModal = () => {
-            modal.classList.remove('active');
-            document.body.style.overflow = ''; 
-        };
-
-        closeBtn.onclick = closeModal;
-        modal.onclick = (e) => {
-            if (e.target === modal) closeModal();
-        };
+        dom.categoryNav.innerHTML = navHtml;
+        dom.menuContainer.innerHTML = menuHtml;
     }
 
-    document.getElementById('btn-pdf').addEventListener('click', () => {
-        window.print();
-    });
+    // --- MODAL Y EVENTOS ---
+    function openModal(title, desc, price, img) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-desc').innerHTML = desc || '<i>Sin descripción</i>';
+        document.getElementById('modal-price').textContent = price;
+        
+        const mImg = document.getElementById('modal-img');
+        if (img) {
+            mImg.src = img;
+            mImg.style.display = 'block';
+        } else {
+            mImg.style.display = 'none';
+        }
 
+        dom.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        dom.modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    dom.modal.addEventListener('click', e => { if (e.target === dom.modal) closeModal(); });
+
+    document.getElementById('btn-pdf').addEventListener('click', () => window.print());
     document.getElementById('btn-theme').addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
-        document.getElementById('btn-theme').textContent =
-            document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        document.getElementById('btn-theme').textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
     });
-
 </script>
 
 </body>
