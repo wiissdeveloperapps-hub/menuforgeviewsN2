@@ -13,7 +13,7 @@
 
     <style>
         /* ========================================================
-           GENERAL Y MODO OSCURO (MANTENIDO DEL ORIGINAL)
+           GENERAL Y MODO OSCURO
         ======================================================== */
         body {
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -49,7 +49,7 @@
         body.dark-mode .search-input { background-color: #252528; color: #fff; border-color: #3a3a3e; }
 
         /* ========================================================
-           HEADER (DISEÑO ORIGINAL RESTAURADO)
+           HEADER
         ======================================================== */
         header {
             background-color: #ffffff;
@@ -78,7 +78,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            display: none; /* Oculto en home */
+            display: none;
         }
         #btn-back:hover { background: #007bff; color: white; transform: scale(1.05); }
 
@@ -146,7 +146,6 @@
         /* TOP BUTTONS */
         .top-buttons { display: flex; gap: 12px; justify-content: center; align-items: center; }
 
-        /* LANGUAGE SELECTOR MODERNO */
         .lang-selector-wrap {
             display: flex; align-items: center; gap: 6px; padding: 8px 12px;
             border-radius: 12px; background: #fff; border: 1px solid #dee2e6;
@@ -181,10 +180,11 @@
             max-width: 800px;
             margin: 0 auto;
             min-height: 70vh;
+            padding-bottom: 80px; /* Espacio extra para que no tape el banner de cookies */
         }
         #loader { text-align: center; padding: 50px; font-size: 1.5em; color: #6c757d; font-weight: 600; }
 
-        /* HOME: GRID DE MENÚS (IMAGEN DE FONDO OPACA CON TEXTO CENTRADO) */
+        /* HOME: GRID DE MENÚS (IMAGEN OPACA + TEXTO CENTRADO) */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -197,7 +197,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             cursor: pointer;
             position: relative;
-            height: 220px; /* Altura fija para efecto banner */
+            height: 220px; 
         }
         .menu-card-img {
             width: 100%;
@@ -215,7 +215,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.55); /* Capa oscura */
+            background: rgba(0, 0, 0, 0.55); 
             z-index: 2;
             display: flex;
             align-items: center;
@@ -226,10 +226,10 @@
             transition: background 0.3s ease;
         }
         .menu-card:hover .menu-card-img {
-            transform: scale(1.08); /* Efecto zoom interior suave */
+            transform: scale(1.08); 
         }
         .menu-card:hover .menu-card-overlay {
-            background: rgba(0, 0, 0, 0.45); /* Aclara ligeramente al pasar el ratón */
+            background: rgba(0, 0, 0, 0.45); 
         }
         .menu-card-title {
             color: #ffffff;
@@ -242,7 +242,7 @@
         }
 
         /* ========================================================
-           VISTA CARTA: CATEGORÍAS Y PLATOS (DISEÑO ORIGINAL)
+           VISTA CARTA: CATEGORÍAS Y PLATOS
         ======================================================== */
         .category { margin-bottom: 50px; }
         .category-title {
@@ -287,7 +287,7 @@
         .fade-in-slide.visible { opacity: 1; transform: translateX(0); }
 
         /* ========================================================
-           MODAL (DISEÑO ORIGINAL)
+           MODAL
         ======================================================== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -326,6 +326,36 @@
         .modal-desc { color: #555; font-size: 1.05em; line-height: 1.6; margin: 0; }
 
         /* ========================================================
+           BANNER DE COOKIES
+        ======================================================== */
+        #cookie-banner {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.08);
+            padding: 16px 24px;
+            box-sizing: border-box;
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 9999;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        #cookie-banner.show { transform: translateY(0); }
+        body.dark-mode #cookie-banner {
+            background: rgba(28, 28, 31, 0.95);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            border-top: 1px solid #2a2a2d;
+        }
+        .cookie-text { font-size: 0.9em; margin-right: 20px; line-height: 1.4; color: inherit; }
+        .btn-cookie {
+            background: #007bff; color: #fff; border: none; padding: 10px 20px;
+            border-radius: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+            white-space: nowrap; transition: transform 0.2s ease, background 0.2s;
+        }
+        .btn-cookie:hover { transform: scale(1.05); background: #0056b3; }
+
+        /* ========================================================
            RESPONSIVE MOBILE
         ======================================================== */
         @media (max-width: 480px) {
@@ -342,6 +372,11 @@
             #language-selector { font-size: 0.8em; }
             .btn-pdf { padding: 6px 10px; font-size: 0.75em; }
             .btn-theme { width: 34px; height: 34px; font-size: 1em; border-radius: 10px; }
+            
+            /* Ajustes cookies móvil */
+            #cookie-banner { flex-direction: column; text-align: center; gap: 12px; padding: 16px; }
+            .cookie-text { margin-right: 0; font-size: 0.85em; }
+            .btn-cookie { width: 100%; }
         }
     </style>
 </head>
@@ -395,24 +430,29 @@
     </div>
 </div>
 
+<!-- Banner de Cookies -->
+<div id="cookie-banner">
+    <div id="cookie-text" class="cookie-text"></div>
+    <button id="cookie-btn" class="btn-cookie" onclick="app.acceptCookies()"></button>
+</div>
+
 <script>
 /**
- * DICCIONARIO DE TRADUCCIONES UI ESTÁTICAS
+ * DICCIONARIO DE TRADUCCIONES UI ESTÁTICAS (Incluye textos de Cookies)
  */
 const I18N = {
-    es: { search: "Buscar platos en todas las cartas...", back: "Volver", normal: "CARTA", diario: "MENÚ DEL DÍA", especial: "MENÚ ESPECIAL", emptyMenu: "Esta carta está vacía.", emptySearch: "No se encontraron resultados para", results: "Resultados de búsqueda" },
-    en: { search: "Search dishes in all menus...", back: "Back", normal: "MENU", diario: "DAILY MENU", especial: "SPECIAL MENU", emptyMenu: "This menu is empty.", emptySearch: "No results found for", results: "Search Results" },
-    fr: { search: "Rechercher des plats...", back: "Retour", normal: "CARTE", diario: "MENU DU JOUR", especial: "MENU SPÉCIAL", emptyMenu: "Ce menu est vide.", emptySearch: "Aucun résultat pour", results: "Résultats de recherche" },
-    it: { search: "Cerca piatti...", back: "Indietro", normal: "MENU", diario: "MENU DEL GIORNO", especial: "MENU SPECIALE", emptyMenu: "Questo menu è vuoto.", emptySearch: "Nessun risultato per", results: "Risultati della ricerca" },
-    de: { search: "Gerichte suchen...", back: "Zurück", normal: "SPEISEKARTE", diario: "TAGESMENÜ", especial: "SPEZIALMENÜ", emptyMenu: "Dieses Menü ist leer.", emptySearch: "Keine Ergebnisse für", results: "Suchergebnisse" },
-    pt: { search: "Pesquisar pratos...", back: "Voltar", normal: "MENU", diario: "MENU DO DIA", especial: "MENU ESPECIAL", emptyMenu: "Este menu está vazio.", emptySearch: "Nenhum resultado para", results: "Resultados da pesquisa" },
-    cn: { search: "搜索菜品...", back: "返回", normal: "菜单", diario: "每日菜单", especial: "特别菜单", emptyMenu: "此菜单为空。", emptySearch: "未找到结果", results: "搜索结果" },
-    sa: { search: "البحث عن الأطباق...", back: "عودة", normal: "قائمة طعام", diario: "القائمة اليومية", especial: "قائمة خاصة", emptyMenu: "هذه القائمة فارغة.", emptySearch: "لا توجد نتائج لـ", results: "نتائج البحث" }
+    es: { search: "Buscar platos en todas las cartas...", back: "Volver", normal: "CARTA", diario: "MENÚ DEL DÍA", especial: "MENÚ ESPECIAL", emptyMenu: "Esta carta está vacía.", emptySearch: "No se encontraron resultados para", results: "Resultados de búsqueda", cookieMsg: "Utilizamos cookies para mejorar su experiencia. Al continuar, acepta su uso.", cookieBtn: "Aceptar" },
+    en: { search: "Search dishes in all menus...", back: "Back", normal: "MENU", diario: "DAILY MENU", especial: "SPECIAL MENU", emptyMenu: "This menu is empty.", emptySearch: "No results found for", results: "Search Results", cookieMsg: "We use cookies to improve your experience. By continuing, you accept their use.", cookieBtn: "Accept" },
+    fr: { search: "Rechercher des plats...", back: "Retour", normal: "CARTE", diario: "MENU DU JOUR", especial: "MENU SPÉCIAL", emptyMenu: "Ce menu est vide.", emptySearch: "Aucun résultat pour", results: "Résultats de recherche", cookieMsg: "Nous utilisons des cookies pour améliorer votre expérience. En continuant, vous acceptez leur utilisation.", cookieBtn: "Accepter" },
+    it: { search: "Cerca piatti...", back: "Indietro", normal: "MENU", diario: "MENU DEL GIORNO", especial: "MENU SPECIALE", emptyMenu: "Questo menu è vuoto.", emptySearch: "Nessun risultato per", results: "Risultati della ricerca", cookieMsg: "Utilizziamo i cookie per migliorare la tua esperienza. Continuando, accetti il loro utilizzo.", cookieBtn: "Accetta" },
+    de: { search: "Gerichte suchen...", back: "Zurück", normal: "SPEISEKARTE", diario: "TAGESMENÜ", especial: "SPEZIALMENÜ", emptyMenu: "Dieses Menü ist leer.", emptySearch: "Keine Ergebnisse für", results: "Suchergebnisse", cookieMsg: "Wir verwenden Cookies, um Ihr Erlebnis zu verbessern. Wenn Sie fortfahren, stimmen Sie zu.", cookieBtn: "Akzeptieren" },
+    pt: { search: "Pesquisar pratos...", back: "Voltar", normal: "MENU", diario: "MENU DO DIA", especial: "MENU ESPECIAL", emptyMenu: "Este menu está vazio.", emptySearch: "Nenhum resultado para", results: "Resultados da pesquisa", cookieMsg: "Usamos cookies para melhorar sua experiência. Ao continuar, você aceita o uso.", cookieBtn: "Aceitar" },
+    cn: { search: "搜索菜品...", back: "返回", normal: "菜单", diario: "每日菜单", especial: "特别菜单", emptyMenu: "此菜单为空。", emptySearch: "未找到结果", results: "搜索结果", cookieMsg: "我们使用 cookie 来改善您的体验。继续浏览即表示您同意使用。", cookieBtn: "接受" },
+    sa: { search: "البحث عن الأطباق...", back: "عودة", normal: "قائمة طعام", diario: "القائمة اليومية", especial: "قائمة خاصة", emptyMenu: "هذه القائمة فارغة.", emptySearch: "لا توجد نتائج لـ", results: "نتائج البحث", cookieMsg: "نستخدم ملفات تعريف الارتباط لتحسين تجربتك. بالاستمرار، فإنك توافق على استخدامها.", cookieBtn: "قبول" }
 };
 
 /**
- * PORTADAS POR DEFECTO (Imágenes Locales)
- * Asegúrate de que las rutas coincidan con tu estructura de carpetas de assets.
+ * PORTADAS POR DEFECTO LOCALES
  */
 const DEFAULT_COVERS = {
     normal: "assets/principal/normal.jpg",
@@ -420,14 +460,13 @@ const DEFAULT_COVERS = {
     especial: "assets/principal/especial.jpg"
 };
 
-
 const app = {
     REPO_OWNER: 'wiissdeveloperapps-hub',
     REPO_NAME: 'menuforgeviews',
     
     data: null,
     currentLang: 'es',
-    currentView: 'home', // home | menu
+    currentView: 'home', 
     currentMenuId: null,
     searchQuery: '',
 
@@ -447,10 +486,13 @@ const app = {
         mImg: document.getElementById('modal-img'),
         mTitle: document.getElementById('modal-title'),
         mPrice: document.getElementById('modal-price'),
-        mDesc: document.getElementById('modal-desc')
+        mDesc: document.getElementById('modal-desc'),
+        
+        cookieBanner: document.getElementById('cookie-banner'),
+        cookieText: document.getElementById('cookie-text'),
+        cookieBtn: document.getElementById('cookie-btn')
     },
 
-    // 1. INICIALIZACIÓN (Maneja QR Global y QR Antiguo)
     async init() {
         try {
             const hash = window.location.hash.substring(1);
@@ -470,7 +512,6 @@ const app = {
                 jsonData = await this.fetchRemote(hash, 'restaurants');
             }
 
-            // Normalización para soportar QR antiguos (1 sola carta) en la nueva interfaz
             if (!jsonData.menus) {
                 this.data = {
                     restaurantInfo: {
@@ -494,11 +535,9 @@ const app = {
         }
     },
 
-    // 2. CONFIGURACIÓN INICIAL (Header e Idiomas)
     setupUI() {
         this.dom.header.style.display = 'block';
 
-        // Restaurar Metadatos del Restaurante
         const rInfo = this.data.restaurantInfo || {};
         this.dom.name.textContent = rInfo.nombre || 'Restaurante';
         
@@ -526,7 +565,6 @@ const app = {
         this.dom.meta.innerHTML = metaHtml;
         this.dom.meta.style.display = metaHtml ? 'flex' : 'none';
 
-        // Configurar Idiomas detectando el primer menú
         const firstMenu = this.data.menus[0];
         if (firstMenu && firstMenu.traducciones) {
             this.dom.langSelect.innerHTML = '';
@@ -542,7 +580,6 @@ const app = {
             this.updateFlag();
         }
 
-        // Eventos
         this.dom.langSelect.addEventListener('change', (e) => {
             this.currentLang = e.target.value;
             this.updateFlag();
@@ -551,6 +588,7 @@ const app = {
         });
 
         this.updateUITexts();
+        this.initCookies();
         this.navigateHome();
     },
 
@@ -558,9 +596,25 @@ const app = {
         const t = I18N[this.currentLang] || I18N['es'];
         this.dom.searchInput.placeholder = t.search;
         this.dom.btnBack.title = t.back;
+        
+        // Textos del banner de cookies
+        this.dom.cookieText.textContent = t.cookieMsg;
+        this.dom.cookieBtn.textContent = t.cookieBtn;
     },
 
-    // 3. RUTAS
+    // Lógica para mostrar y aceptar cookies
+    initCookies() {
+        if (!localStorage.getItem('cookiesAccepted_MenuForge')) {
+            // Un pequeño retraso para que aparezca fluidamente al cargar
+            setTimeout(() => this.dom.cookieBanner.classList.add('show'), 800);
+        }
+    },
+
+    acceptCookies() {
+        localStorage.setItem('cookiesAccepted_MenuForge', 'true');
+        this.dom.cookieBanner.classList.remove('show');
+    },
+
     navigateHome() {
         this.currentView = 'home';
         this.currentMenuId = null;
@@ -588,7 +642,6 @@ const app = {
         else this.renderHomeGrid();
     },
 
-    // 4. RENDERERS
     renderHomeGrid() {
         const menus = this.data.menus || [];
         const t = I18N[this.currentLang] || I18N['es'];
@@ -606,17 +659,18 @@ const app = {
 
         let html = '<div class="menu-grid">';
         menus.forEach(menu => {
-            // FORZAMOS EL USO DE NUESTRA CONSTANTE LOCAL, IGNORANDO TOTALMENTE EL JSON
             const tipo = (menu.tipoMenu || 'normal').toLowerCase();
             const coverImg = DEFAULT_COVERS[tipo] || DEFAULT_COVERS.normal;
+            
+            // Añadimos el timestamp para romper la caché del navegador
+            const noCacheImg = `${coverImg}?t=${new Date().getTime()}`;
             
             const trans = menu.traducciones?.[this.currentLang];
             const menuName = trans?.nombreCarta || menu.nombreCarta || 'Carta';
 
             html += `
                 <div class="menu-card fade-in-slide" onclick="app.navigateToMenu('${menu.id}')">
-                    <!-- Añadimos un timestamp a la URL para evitar caché del navegador -->
-                    <img class="menu-card-img" src="${coverImg}?t=${new Date().getTime()}" alt="${this.escapeHTML(menuName)}" loading="lazy">
+                    <img class="menu-card-img" src="${noCacheImg}" alt="${this.escapeHTML(menuName)}" loading="lazy">
                     <div class="menu-card-overlay">
                         <h2 class="menu-card-title">${this.escapeHTML(menuName)}</h2>
                     </div>
@@ -657,7 +711,6 @@ const app = {
         window.scrollTo(0,0);
     },
 
-    // 5. BUSCADOR
     handleSearch(query) {
         this.searchQuery = query.trim().toLowerCase();
         if (!this.searchQuery) {
@@ -732,7 +785,6 @@ const app = {
         `;
     },
 
-    // 6. MODAL (Lógica del Original)
     openModal(safeDataStr) {
         const data = JSON.parse(decodeURIComponent(safeDataStr));
         this.dom.mTitle.innerHTML = data.name;
@@ -758,7 +810,6 @@ const app = {
         }
     },
 
-    // 7. UTILIDADES
     updateFlag() { this.dom.currentFlag.src = `assets/flags/${this.currentLang}.png`; },
     
     toggleTheme() {
@@ -787,14 +838,12 @@ const app = {
             });
         }, { threshold: 0.05, rootMargin: "0px 0px -20px 0px" });
         elements.forEach(el => observer.observe(el));
-        // Force display logic to trigger instantly for elements already in view
         setTimeout(() => elements.forEach(el => {
             const rect = el.getBoundingClientRect();
             if(rect.top < window.innerHeight) el.classList.add('visible');
         }), 100);
     },
 
-    // 8. RED Y DECOMPRESIÓN
     decompressPako(base64String) {
         const compressed = atob(base64String).split('').map(c => c.charCodeAt(0));
         return JSON.parse(pako.inflate(new Uint8Array(compressed), { to: 'string' }));
