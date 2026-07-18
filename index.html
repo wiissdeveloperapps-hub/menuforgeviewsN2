@@ -941,7 +941,10 @@ const app = {
         const observerOptions = {
             root: null,
             rootMargin: `-${this.dom.header.offsetHeight + 20}px 0px 0px 0px`,
-            threshold: 0.1
+            // Umbral (threshold) más alto para que el observador se dispare con menos frecuencia.
+            // Esto reduce la carga de trabajo durante el scroll rápido, mejorando la fluidez
+            // y evitando la sensación de "lentitud" o "jank" en dispositivos móviles.
+            threshold: 0.4
         };
         this.categoryTabsObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1226,19 +1229,19 @@ const app = {
 
     initScrollAnimations() {
         const elements = document.querySelectorAll('.fade-in-slide');
+        // Se optimiza el observador para mejorar el rendimiento de la carga inicial.
+        // Se elimina un bucle manual con setTimeout que recorría todos los elementos,
+        // ya que el propio IntersectionObserver es más eficiente para detectar elementos visibles.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry, index) => {
                 if (entry.isIntersecting) {
+                    // Se mantiene un pequeño delay escalonado para un efecto visual más agradable.
                     setTimeout(() => entry.target.classList.add('visible'), index * 70);
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.05, rootMargin: "0px 0px -20px 0px" });
+        }, { threshold: 0.01 }); // Un umbral bajo asegura que la animación se dispare en cuanto el elemento aparece.
         elements.forEach(el => observer.observe(el));
-        setTimeout(() => elements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            if(rect.top < window.innerHeight) el.classList.add('visible');
-        }), 100);
     },
 
     decompressPako(base64String) {
